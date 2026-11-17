@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NULL · İstanbul Toplanma Alanları</title>
+<meta name="description" content="İstanbul'un 5.599 deprem toplanma alanı haritada. Binandan gerçek sokaklar üzerinden kaç metre yürüyorsun? Veri neyi söylemiyor?">
+<meta property="og:title" content="NULL · Haritada var, erişimde yok: İstanbul'un deprem toplanma alanları">
+<meta property="og:description" content="İstanbul'daki her binadan en yakın deprem toplanma alanına, OpenStreetMap sokakları üzerinden yürüme mesafesi. Rotayı görmek için binaya tıkla.">
+<script>
+  (function () { var t = new URLSearchParams(location.search).get("theme"); document.documentElement.dataset.theme = t === "light" ? "light" : "dark"; })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+<link href="style.css?v=18" rel="stylesheet">
+</head>
+<body>
+<div class="app">
+  <main class="mapwrap">
+    <div id="map" aria-label="İstanbul haritası: her binadan en yakın deprem toplanma alanına yürüme mesafesi"></div>
+    <div class="card legend-card" id="legend" aria-live="polite"></div>
+    <div class="card mapbar">
+      <div class="seg seg2 mini" id="layerSeg"><button data-l="b" class="on">Binalar</button><button data-l="m">Mahalleler</button></div>
+      <button class="pill" id="themeBtn">☀ Light map</button>
+      <button class="pill" id="langBtn" title="English / Türkçe">EN</button>
+    </div>
+    <div id="tip" class="tip" hidden></div>
+    <div id="loading" class="loading">İstanbul yükleniyor…</div>
+    <div class="intro card" id="intro" hidden>
+      <p class="eyebrow">#30DayMapChallenge · Day 18 · NULL</p>
+      <h2>Haritada var. Erişimde var mı?</h2>
+      <ol class="steps">
+        <li>İstanbul'da <b>5.599 deprem toplanma alanı</b> var. Bu harita her binadan en yakın alana yürüyüşü kuş uçuşu değil, gerçek sokak ve patikalar üzerinden ölçüyor.</li>
+        <li><b>Herhangi bir binaya tıkla</b>: en kısa yürüme rotasını ve kaç dakika sürdüğünü gör.</li>
+        <li><b>NULL</b> burada iki anlama geliyor: en yakın toplanma alanına 500 m'den uzak evler ve verinin kendisinde eksik olanlar, örneğin alanların büyüklüğü.</li>
+      </ol>
+      <button class="primary" id="introGo">Binamı bul</button>
+    </div>
+  </main>
+
+  <aside class="panel card" id="panel">
+    <header class="head">
+      <p class="eyebrow">#30DayMapChallenge · Day 18 · NULL · Istanbul</p>
+      <h1>NULL · Haritada var, erişimde yok</h1>
+      <p class="lede" id="lede">&nbsp;</p>
+    </header>
+
+    <section class="block" id="detail" hidden></section>
+
+    <section class="block">
+      <h2 class="label">Yer ara</h2>
+      <div class="search"><input id="q" type="search" placeholder="Mahalle, ilçe ya da toplanma alanı, örn. Esenyurt" autocomplete="off"><button id="qGo">Ara</button></div>
+      <p class="msg" id="qMsg"></p>
+    </section>
+
+    <section class="block">
+      <h2 class="label">Yürüyüş ne kadar? · sakinlerin oranı</h2>
+      <div class="stack big-stack" id="walkStack"></div>
+      <div class="spk" id="walkKey"></div>
+    </section>
+
+    <section class="block">
+      <h2 class="label">İlçeler · 500 m'den uzakta yaşayanlar</h2>
+      <ul class="rank" id="distRank"></ul>
+      <p class="hint">Yakınlaşmak için bir ilçeye tıkla.</p>
+    </section>
+
+    <section class="block">
+      <h2 class="label">500 m'den uzakta en çok kişinin yaşadığı mahalleler</h2>
+      <ul class="rank" id="mahRank"></ul>
+    </section>
+
+    <section class="block">
+      <h2 class="label">Diğer NULL: verinin söylemedikleri</h2>
+      <div class="nulls" id="nulls"></div>
+    </section>
+
+    <section class="block">
+      <h2 class="label">Yöntem, veri ve sınırlar</h2>
+      <details class="howto" open>
+        <summary>Yürüyüş nasıl ölçüldü</summary>
+        <p><b>Daire değil, sokak.</b> Mesafe, OpenStreetMap üzerinden en kısa yürüyüş: kaldırımlı ya da kaldırımsız sokaklar, patikalar, merdivenler ve meydanlar. Otoyollar ve yayalara kapalı yollar dahil değil. 500 m'lik bir daire, sokakların sunduğundan fazlasını vaat ederdi.</p>
+        <p><b>Girişler.</b> Toplanma noktası haritalanmış bir park, meydan ya da okul bahçesindeyse, alanın kenarına ulaştığında varmış sayılırsın. Değilse noktanın kendisine yürürsün.</p>
+        <p><b>Binalar.</b> Her OSM binası, kendisine en yakın bağlantılı yol noktasından yürür. Nüfus WorldPop 2020'den (100 m ızgara) geliyor ve her hücredeki konut binalarına taban alanına göre dağıtılıyor.</p>
+        <p><b>500 m</b> yaklaşık 7 dakikalık yürüyüş. Yukarıdaki çubukta 250 m, 1 km ve 2 km eşiklerini de görebilirsin.</p>
+      </details>
+      <details class="howto">
+        <summary>Veri kalitesi ve sınırlar</summary>
+        <p id="dq"></p>
+        <p>İBB verisi sadece nokta ve isim veriyor; alan ve kapasite yok. Buradaki büyüklükler, noktanın düştüğü OSM açık alanından tahmin. Nüfus bir kayıt değil, 2020 modeli. Depremden sonra enkaz, çit ya da kalabalık yüzünden kapanan yollar hiçbir haritada yok. Harita <b>normal bir günde yürüme mesafesini</b> gösteriyor; güvenliği ya da kapasiteyi değil.</p>
+      </details>
+      <details class="howto">
+        <summary>Kaynaklar</summary>
+        <ol class="refs">
+          <li>Acil Durum Toplanma Alanları, İstanbul Büyükşehir Belediyesi, <a href="https://data.ibb.gov.tr/">İBB Açık Veri Portalı</a>.</li>
+          <li>OpenStreetMap katkıcıları, ODbL: yaya ağı, binalar, açık alanlar, mahalle ve ilçe sınırları (Geofabrik).</li>
+          <li>WorldPop (2020). Türkiye nüfus dağılımı, 100 m. <a href="https://www.worldpop.org/">worldpop.org</a>, CC BY 4.0.</li>
+        </ol>
+      </details>
+    </section>
+
+    <footer class="foot">
+      <p><b>Veri ve lisanslar.</b> Toplanma alanları © İBB Açık Veri · © OpenStreetMap katkıcıları (ODbL) · WorldPop (CC BY 4.0) · altlık © <a href="https://carto.com/attribution">CARTO</a>.</p>
+      <p>Barış Parlatangiller · <a href="https://barisparlatangiller.github.io/">30 haritanın hepsi</a> · <a href="https://github.com/barisparlatangiller/30DMC26-D18-NULL-Istanbul-Assembly-Access">kod ve yöntem</a> · yapay zekâ desteğiyle hazırlandı (Claude, Anthropic)</p>
+    </footer>
+  </aside>
+</div>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/pmtiles@3.2.1/dist/pmtiles.js"></script>
+<script src="app.js?v=18"></script>
+</body>
+</html>
