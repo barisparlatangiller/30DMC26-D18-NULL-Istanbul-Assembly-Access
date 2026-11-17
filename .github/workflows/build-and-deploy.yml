@@ -1,0 +1,86 @@
+name: Build walking access to assembly areas and deploy map
+
+# Day 18 · NULL · Istanbul. OSM (Geofabrik) walk network + IBB earthquake assembly areas + WorldPop people →
+# walking distance from every building to its nearest assembly area → web layers + LinkedIn film → GitHub Pages.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install tools
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y -q osmium-tool tippecanoe ffmpeg fonts-inter gdal-bin
+          pip install -r requirements.txt
+          mkdir -p logs input build docs/data
+
+      - name: Cache OSM + population
+        uses: actions/cache@v4
+        with:
+          path: |
+            input/istanbul.osm.pbf
+            input/pop.tif
+          key: istanbul-osm-pop-v1
+
+      - name: OSM Istanbul + WorldPop
+        run: |
+          bash pipeline/fetch.sh 2>&1 | tee logs/01_fetch.log
+          test ${PIPESTATUS[0]} -eq 0
+
+      - name: Walking distance to assembly areas
+        run: |
+          python pipeline/analyse.py 2>&1 | tee logs/02_analyse.log
+          test ${PIPESTATUS[0]} -eq 0
+
+      - name: Web layers
+        run: |
+          python pipeline/build_web.py 2>&1 | tee logs/03_web.log
+          test ${PIPESTATUS[0]} -eq 0
+
+      - name: LinkedIn film
+        continue-on-error: true
+        run: |
+          if [ -f pipeline/film.py ]; then python pipeline/film.py 2>&1 | tee logs/04_film.log; fi
+          mkdir -p docs/data/video && cp build/video/*.mp4 build/video/*.png docs/data/video/ 2>/dev/null || true
+
+      - name: Publish results + logs to the 'data' branch
+        if: always()
+        continue-on-error: true
+        run: |
+          mkdir -p /tmp/snap && cd /tmp/snap
+          cp -r $GITHUB_WORKSPACE/logs . || true
+          cp $GITHUB_WORKSPACE/docs/data/stats.json $GITHUB_WORKSPACE/docs/data/*.geojson . 2>/dev/null || true
+          mkdir -p video && cp $GITHUB_WORKSPACE/build/video/*.mp4 $GITHUB_WORKSPACE/build/video/*.png video/ 2>/dev/null || true
+          mkdir -p build && cp $GITHUB_WORKSPACE/build/*.parquet build/ 2>/dev/null || true
+          find . -type f -size +95M -print -delete
+          printf '# Result files\n\nBuilt by the GitHub Action from commit %s on %s.\n' "$GITHUB_SHA" "$(date -u +%F)" > README.md
+          git init -q -b data && git add -A
+          git -c user.name="github-actions" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -qm "Results of $GITHUB_SHA"
+          git -c http.postBuffer=524288000 push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" data:data 2>&1 | tail -3
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - id: deployment
+        uses: actions/deploy-pages@v4

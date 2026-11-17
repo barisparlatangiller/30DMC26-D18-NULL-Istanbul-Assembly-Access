@@ -1,0 +1,12 @@
+geopandas>=1.0
+pyogrio>=0.9
+pyarrow
+shapely>=2.0
+numpy
+pandas
+scipy
+rasterio
+pyproj
+osmium>=3.7
+requests
+pillow
