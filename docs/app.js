@@ -54,6 +54,8 @@
       map.addSource("b", { type: "vector", url: "pmtiles://" + new URL(`data/buildings.pmtiles?v=${S.build || 1}`, location.href).href });
       map.addLayer({ id: "bf", type: "fill", source: "b", "source-layer": "b", minzoom: 12.5,
         paint: { "fill-color": ["case", ["<", ["get", "d"], 0], NOWAY, dcol], "fill-opacity": ["interpolate", ["linear"], ["zoom"], 12.5, 0, 13.5, 0.92] } }, first);
+      map.addSource("sel", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      map.addLayer({ id: "selb", type: "line", source: "sel", paint: { "line-color": dark ? "#fff" : "#1f1d1a", "line-width": 3 } });
       map.addSource("route", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       map.addLayer({ id: "rglow", type: "line", source: "route", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": dark ? "rgba(255,255,255,.35)" : "rgba(255,255,255,.9)", "line-width": 9 } });
       map.addLayer({ id: "rline", type: "line", source: "route", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": ["get", "c"], "line-width": 4 } });
@@ -104,9 +106,10 @@
   }
   async function route(f, ll) {
     const p = f.properties;
+    map.getSource("sel").setData({ type: "FeatureCollection", features: [{ type: "Feature", properties: {}, geometry: f.geometry }] });
     const c = p.d < 0 ? NOWAY : COL[BRK.findIndex((b) => p.d < b) < 0 ? 4 : BRK.findIndex((b) => p.d < b)];
     if (p.d < 0 || p.n < 0) {
-      popup.setLngLat(ll).setHTML(`<div class="pop"><b>No mapped way nearby</b><small>No walkable street within 250 m in OpenStreetMap: the walk is NULL here.</small></div>`).addTo(map);
+      popup.setLngLat(ll).setHTML(`<div class="pop"><b>No mapped way nearby</b><small>No connected walkable way within 400 m in OpenStreetMap: the walk is NULL here.</small></div>`).addTo(map);
       return;
     }
     const pts = [[ll.lng, ll.lat]];
@@ -210,7 +213,7 @@
     const ramp = COL.map((c, i) => `<div class="lg-row"><i class="sq" style="background:${c}"></i>${LBL[i]}${i >= 2 ? " <small>NULL · beyond 500 m</small>" : ""}</div>`).join("");
     if (z >= 13) {
       L.innerHTML = `<div class="lg-title">Walk to the nearest assembly area</div><div class="lg-sub">every building, along OSM streets · tap one for its route</div>${ramp}
-        <div class="lg-row"><i class="sq" style="background:${NOWAY}"></i>no mapped way within 250 m</div>
+        <div class="lg-row"><i class="sq" style="background:${NOWAY}"></i>no connected way within 400 m <small>walk NULL</small></div>
         <div class="lg-row"><i style="background:${dark ? "#f4efe6" : "#2b2925"}"></i>assembly area <small>size from OSM</small></div>
         <div class="lg-row"><i style="border:1.6px solid ${dark ? "#f4efe6" : "#2b2925"}"></i>assembly area, size NULL</div>`;
     } else {

@@ -33,6 +33,7 @@ IN, B, W = Path("input"), Path("build"), Path("docs/data")
 CRS = 32635                                   # UTM 35N, metres
 LIMIT = 6000.0                                # follow the walk up to 6 km
 WALK_KMH = 4.5
+SNAP = 400.0                                  # a building more than this from any connected way has no measurable walk
 NOT_WALK = {"motorway", "motorway_link", "construction", "proposed", "abandoned", "raceway", "bus_guideway", "escape",
             "razed", "disused", "platform", "corridor", "elevator", "via_ferrata", "no"}
 NON_RES = {"industrial", "warehouse", "commercial", "retail", "office", "mosque", "church", "synagogue", "religious",
@@ -246,12 +247,17 @@ def main():
     b["res"] = ~btype.isin(NON_RES) & b.get("amenity", pd.Series(index=b.index, dtype=object)).isna() & (b.area < 20_000)
     c = b.geometry.representative_point()
     cx, cy = c.x.values, c.y.values
-    dd, nn = tree.query(np.c_[cx, cy])
+    # snap to the nearest node that is connected to an assembly area (isolated bits of path in OSM are skipped)
+    ridx = np.nonzero(np.isfinite(dist_n))[0]
+    rtree = cKDTree(xy[ridx])
+    n_all = tree.query(np.c_[cx, cy])[0]
+    dd, k = rtree.query(np.c_[cx, cy]); nn = ridx[k]
+    log(f"buildings whose nearest way is cut off from the network: {(dd > n_all + 1).sum():,} (snapped to the next connected way)")
     b["node"] = nn
     b["snap"] = dd
-    b["d"] = np.where(dd <= 250, dist_n[nn] + dd, np.inf)
+    b["d"] = np.where(dd <= SNAP, dist_n[nn] + dd, np.inf)
     b["pid"] = np.where(np.isfinite(b.d), near_pid[nn], -1)
-    log(f"buildings: {len(b):,} ({b.res.sum():,} residential-looking); snapped > 250 m: {(dd > 250).sum():,}")
+    log(f"buildings: {len(b):,} ({b.res.sum():,} residential-looking); no connected way within {SNAP:.0f} m: {(dd > SNAP).sum():,}")
 
     # people -----------------------------------------------------------------------------
     with rasterio.open(IN / "pop.tif") as s:
@@ -274,8 +280,8 @@ def main():
     orph = gpd.GeoDataFrame({"pop": orphan[m_or]}, geometry=gpd.points_from_xy(np.array(ox)[m_or], np.array(oy)[m_or]), crs=CRS)
     if city is not None:
         orph = orph[orph.within(city)]
-    od, on = tree.query(np.c_[orph.geometry.x, orph.geometry.y])
-    orph["d"] = np.where(od <= 250, dist_n[on] + od, np.inf)
+    od, ok_ = rtree.query(np.c_[orph.geometry.x, orph.geometry.y]); on = ridx[ok_]
+    orph["d"] = np.where(od <= SNAP, dist_n[on] + od, np.inf)
     P_b, P_o = b["pop"].sum(), orph["pop"].sum()
     log(f"people: {P_b + P_o:,.0f} in Istanbul (WorldPop 2020); {P_b:,.0f} in OSM buildings, {P_o:,.0f} ({P_o / (P_b + P_o):.1%}) in cells without a mapped home")
 
