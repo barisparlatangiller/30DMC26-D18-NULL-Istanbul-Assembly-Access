@@ -1,0 +1,563 @@
+{
+ "people": 15958744,
+ "share_over": {
+  "250": 0.5552,
+  "500": 0.2441,
+  "1000": 0.0932,
+  "2000": 0.0325
+ },
+ "people_over_500": 3895497,
+ "median_walk_person_m": 280,
+ "points": {
+  "total": 5599,
+  "in_open_space": 3673,
+  "area_null": 1926,
+  "off_network": 6,
+  "kinds": {
+   "leisure=park": 1780,
+   "amenity=school": 1020,
+   "leisure=pitch": 311,
+   "landuse=grass": 157,
+   "amenity=parking": 133,
+   "leisure=playground": 127,
+   "leisure=sports_centre": 28,
+   "highway=pedestrian": 24,
+   "place=square": 21,
+   "leisure=garden": 18
+  },
+  "fields_empty": {
+   "SE_ANNO_CAD_DATA": 5599,
+   "KIMLIKNO": 17
+  },
+  "area_m2_known": 34146521
+ },
+ "buildings": {
+  "total": 738615,
+  "residential": 710717,
+  "people_in_cells_without_buildings": 5563294
+ },
+ "worst_mahalle": [
+  {
+   "mahalle": "Maltepe Mahallesi",
+   "district": "Zeytinburnu",
+   "pop": 73553.51,
+   "out": 53626.336,
+   "share_out": 0.729,
+   "n": 1.0
+  },
+  {
+   "mahalle": "Atakent Mahallesi",
+   "district": "Küçükçekmece",
+   "pop": 195612.04,
+   "out": 43230.343,
+   "share_out": 0.221,
+   "n": 55.0
+  },
+  {
+   "mahalle": "Tahtakale Mahallesi",
+   "district": "Avcılar",
+   "pop": 73547.041,
+   "out": 34306.461,
+   "share_out": 0.466,
+   "n": 23.0
+  },
+  {
+   "mahalle": "Halkalı Merkez Mahallesi",
+   "district": "Küçükçekmece",
+   "pop": 140824.74,
+   "out": 34151.48,
+   "share_out": 0.243,
+   "n": 28.0
+  },
+  {
+   "mahalle": "Yarımburgaz Mahallesi",
+   "district": "Küçükçekmece",
+   "pop": 38678.245,
+   "out": 29032.075,
+   "share_out": 0.751,
+   "n": 0.0
+  },
+  {
+   "mahalle": "Zafer Mahallesi",
+   "district": "Esenyurt",
+   "pop": 43577.247,
+   "out": 28615.403,
+   "share_out": 0.657,
+   "n": 2.0
+  },
+  {
+   "mahalle": "Bahçeşehir 2. Kısım Mahallesi",
+   "district": "Başakşehir",
+   "pop": 55527.066,
+   "out": 28614.237,
+   "share_out": 0.515,
+   "n": 9.0
+  },
+  {
+   "mahalle": "Ferhatpaşa Mahallesi",
+   "district": "Ataşehir",
+   "pop": 48219.398,
+   "out": 28405.707,
+   "share_out": 0.589,
+   "n": 5.0
+  },
+  {
+   "mahalle": "15 Temmuz Mahallesi",
+   "district": "Bağcılar",
+   "pop": 110152.538,
+   "out": 27742.739,
+   "share_out": 0.252,
+   "n": 15.0
+  },
+  {
+   "mahalle": "Hamidiye Mahallesi",
+   "district": "Kâğıthane",
+   "pop": 99405.62,
+   "out": 25006.342,
+   "share_out": 0.252,
+   "n": 25.0
+  },
+  {
+   "mahalle": "Acarlar Mahallesi",
+   "district": "Beykoz",
+   "pop": 29254.184,
+   "out": 24978.957,
+   "share_out": 0.854,
+   "n": 4.0
+  },
+  {
+   "mahalle": "Yenişehir Mahallesi",
+   "district": "Pendik",
+   "pop": 61763.842,
+   "out": 22636.551,
+   "share_out": 0.367,
+   "n": 15.0
+  },
+  {
+   "mahalle": "Kordonboyu Mahallesi",
+   "district": "Kartal",
+   "pop": 29571.534,
+   "out": 20506.457,
+   "share_out": 0.693,
+   "n": 1.0
+  },
+  {
+   "mahalle": "Güzeltepe Mahallesi",
+   "district": "Eyüpsultan",
+   "pop": 45274.259,
+   "out": 20312.031,
+   "share_out": 0.449,
+   "n": 5.0
+  },
+  {
+   "mahalle": "Zekeriyaköy Mahallesi",
+   "district": "Sarıyer",
+   "pop": 25565.99,
+   "out": 20128.115,
+   "share_out": 0.787,
+   "n": 4.0
+  }
+ ],
+ "worst_share": [
+  {
+   "mahalle": "Alkent 2000 Mahallesi",
+   "district": "Büyükçekmece",
+   "pop": 5439.593,
+   "out": 4893.877,
+   "share_out": 0.9,
+   "n": 4.0
+  },
+  {
+   "mahalle": "Fatih Mahallesi",
+   "district": "Küçükçekmece",
+   "pop": 11363.682,
+   "out": 10193.354,
+   "share_out": 0.897,
+   "n": 0.0
+  },
+  {
+   "mahalle": "Acarlar Mahallesi",
+   "district": "Beykoz",
+   "pop": 29254.184,
+   "out": 24978.957,
+   "share_out": 0.854,
+   "n": 4.0
+  },
+  {
+   "mahalle": "Riva Mahallesi",
+   "district": "Beykoz",
+   "pop": 6413.158,
+   "out": 5143.877,
+   "share_out": 0.802,
+   "n": 2.0
+  },
+  {
+   "mahalle": "Ataköy 2-5-6. Kısım Mahallesi",
+   "district": "Bakırköy",
+   "pop": 7595.818,
+   "out": 6020.145,
+   "share_out": 0.793,
+   "n": 1.0
+  },
+  {
+   "mahalle": "Zekeriyaköy Mahallesi",
+   "district": "Sarıyer",
+   "pop": 25565.99,
+   "out": 20128.115,
+   "share_out": 0.787,
+   "n": 4.0
+  },
+  {
+   "mahalle": "Altınşehir Mahallesi",
+   "district": "Başakşehir",
+   "pop": 12207.494,
+   "out": 9433.845,
+   "share_out": 0.773,
+   "n": 0.0
+  },
+  {
+   "mahalle": "Mimar Sinan Mahallesi",
+   "district": "Silivri",
+   "pop": 18676.022,
+   "out": 14139.731,
+   "share_out": 0.757,
+   "n": 10.0
+  },
+  {
+   "mahalle": "Yarımburgaz Mahallesi",
+   "district": "Küçükçekmece",
+   "pop": 38678.245,
+   "out": 29032.075,
+   "share_out": 0.751,
+   "n": 0.0
+  },
+  {
+   "mahalle": "Maltepe Mahallesi",
+   "district": "Zeytinburnu",
+   "pop": 73553.51,
+   "out": 53626.336,
+   "share_out": 0.729,
+   "n": 1.0
+  },
+  {
+   "mahalle": "Kordonboyu Mahallesi",
+   "district": "Kartal",
+   "pop": 29571.534,
+   "out": 20506.457,
+   "share_out": 0.693,
+   "n": 1.0
+  },
+  {
+   "mahalle": "Güvercintepe Mahallesi",
+   "district": "Başakşehir",
+   "pop": 15744.74,
+   "out": 10378.725,
+   "share_out": 0.659,
+   "n": 5.0
+  },
+  {
+   "mahalle": "Zafer Mahallesi",
+   "district": "Esenyurt",
+   "pop": 43577.247,
+   "out": 28615.403,
+   "share_out": 0.657,
+   "n": 2.0
+  },
+  {
+   "mahalle": "Balmumcu Mahallesi",
+   "district": "Beşiktaş",
+   "pop": 4290.133,
+   "out": 2796.59,
+   "share_out": 0.652,
+   "n": 1.0
+  },
+  {
+   "mahalle": "Demirciköy Mahallesi",
+   "district": "Sarıyer",
+   "pop": 3337.443,
+   "out": 2065.522,
+   "share_out": 0.619,
+   "n": 1.0
+  }
+ ],
+ "districts": [
+  {
+   "district": "Silivri",
+   "pop": 182858.986,
+   "out": 125672.047,
+   "n": 123,
+   "share_out": 0.687
+  },
+  {
+   "district": "Başakşehir",
+   "pop": 389744.436,
+   "out": 265960.227,
+   "n": 45,
+   "share_out": 0.682
+  },
+  {
+   "district": "Şile",
+   "pop": 25004.536,
+   "out": 15857.213,
+   "n": 90,
+   "share_out": 0.634
+  },
+  {
+   "district": "Arnavutköy",
+   "pop": 426039.656,
+   "out": 260948.072,
+   "n": 142,
+   "share_out": 0.612
+  },
+  {
+   "district": "Büyükçekmece",
+   "pop": 75759.947,
+   "out": 45319.642,
+   "n": 125,
+   "share_out": 0.598
+  },
+  {
+   "district": "Çatalca",
+   "pop": 66587.72,
+   "out": 36281.933,
+   "n": 85,
+   "share_out": 0.545
+  },
+  {
+   "district": "Tuzla",
+   "pop": 326513.452,
+   "out": 173538.202,
+   "n": 116,
+   "share_out": 0.531
+  },
+  {
+   "district": "Sarıyer",
+   "pop": 458753.477,
+   "out": 207139.847,
+   "n": 184,
+   "share_out": 0.452
+  },
+  {
+   "district": "Beykoz",
+   "pop": 342976.957,
+   "out": 154112.396,
+   "n": 168,
+   "share_out": 0.449
+  },
+  {
+   "district": "Çekmeköy",
+   "pop": 346822.986,
+   "out": 137166.433,
+   "n": 163,
+   "share_out": 0.395
+  },
+  {
+   "district": "Eyüpsultan",
+   "pop": 541384.18,
+   "out": 212139.422,
+   "n": 114,
+   "share_out": 0.392
+  },
+  {
+   "district": "Zeytinburnu",
+   "pop": 271761.764,
+   "out": 96833.609,
+   "n": 32,
+   "share_out": 0.356
+  },
+  {
+   "district": "Bakırköy",
+   "pop": 189987.071,
+   "out": 67252.172,
+   "n": 104,
+   "share_out": 0.354
+  },
+  {
+   "district": "Beylikdüzü",
+   "pop": 214205.589,
+   "out": 75363.658,
+   "n": 193,
+   "share_out": 0.352
+  },
+  {
+   "district": "Beşiktaş",
+   "pop": 120444.765,
+   "out": 34863.241,
+   "n": 59,
+   "share_out": 0.289
+  },
+  {
+   "district": "Adalar",
+   "pop": 10663.742,
+   "out": 2853.44,
+   "n": 25,
+   "share_out": 0.268
+  },
+  {
+   "district": "Esenyurt",
+   "pop": 582440.782,
+   "out": 155615.926,
+   "n": 125,
+   "share_out": 0.267
+  },
+  {
+   "district": "Pendik",
+   "pop": 599492.528,
+   "out": 155934.309,
+   "n": 253,
+   "share_out": 0.26
+  },
+  {
+   "district": "Bayrampaşa",
+   "pop": 364859.804,
+   "out": 79668.26,
+   "n": 52,
+   "share_out": 0.218
+  },
+  {
+   "district": "Küçükçekmece",
+   "pop": 836205.989,
+   "out": 179847.596,
+   "n": 219,
+   "share_out": 0.215
+  },
+  {
+   "district": "Sancaktepe",
+   "pop": 446362.158,
+   "out": 95805.405,
+   "n": 162,
+   "share_out": 0.215
+  },
+  {
+   "district": "Maltepe",
+   "pop": 401657.316,
+   "out": 82621.188,
+   "n": 206,
+   "share_out": 0.206
+  },
+  {
+   "district": "Ataşehir",
+   "pop": 358455.853,
+   "out": 73654.771,
+   "n": 152,
+   "share_out": 0.205
+  },
+  {
+   "district": "Kartal",
+   "pop": 504668.072,
+   "out": 103584.663,
+   "n": 224,
+   "share_out": 0.205
+  },
+  {
+   "district": "Avcılar",
+   "pop": 570844.803,
+   "out": 114062.539,
+   "n": 149,
+   "share_out": 0.2
+  },
+  {
+   "district": "Ümraniye",
+   "pop": 695204.059,
+   "out": 138786.352,
+   "n": 278,
+   "share_out": 0.2
+  },
+  {
+   "district": "Sultangazi",
+   "pop": 654110.952,
+   "out": 129661.019,
+   "n": 158,
+   "share_out": 0.198
+  },
+  {
+   "district": "Kadıköy",
+   "pop": 365759.422,
+   "out": 61945.47,
+   "n": 153,
+   "share_out": 0.169
+  },
+  {
+   "district": "Esenler",
+   "pop": 560874.204,
+   "out": 90556.802,
+   "n": 96,
+   "share_out": 0.161
+  },
+  {
+   "district": "Üsküdar",
+   "pop": 748917.632,
+   "out": 114471.272,
+   "n": 259,
+   "share_out": 0.153
+  },
+  {
+   "district": "Bağcılar",
+   "pop": 1195094.681,
+   "out": 169782.094,
+   "n": 261,
+   "share_out": 0.142
+  },
+  {
+   "district": "Sultanbeyli",
+   "pop": 408421.526,
+   "out": 43506.36,
+   "n": 142,
+   "share_out": 0.107
+  },
+  {
+   "district": "Beyoğlu",
+   "pop": 233446.548,
+   "out": 23880.686,
+   "n": 56,
+   "share_out": 0.102
+  },
+  {
+   "district": "Bahçelievler",
+   "pop": 631270.385,
+   "out": 58095.212,
+   "n": 176,
+   "share_out": 0.092
+  },
+  {
+   "district": "Kâğıthane",
+   "pop": 496183.497,
+   "out": 34573.557,
+   "n": 174,
+   "share_out": 0.07
+  },
+  {
+   "district": "Fatih",
+   "pop": 316542.441,
+   "out": 17428.561,
+   "n": 190,
+   "share_out": 0.055
+  },
+  {
+   "district": "Şişli",
+   "pop": 210134.787,
+   "out": 11517.117,
+   "n": 111,
+   "share_out": 0.055
+  },
+  {
+   "district": "Gaziosmanpaşa",
+   "pop": 397711.006,
+   "out": 18515.596,
+   "n": 120,
+   "share_out": 0.047
+  },
+  {
+   "district": "Güngören",
+   "pop": 358445.248,
+   "out": 8150.147,
+   "n": 115,
+   "share_out": 0.023
+  }
+ ],
+ "tree": {
+  "nodes": 602640,
+  "tiles": 1180,
+  "tile_deg": 0.02
+ }
+}

@@ -1,0 +1,14 @@
+  Bounding boxes:
+  Bounding box: (26.3314803,40.3013068,41.5601474,45.6513934)
+  Number of changesets: 0
+  Number of nodes: 7653521
+  Number of ways: 1217313
+  Number of relations: 10706
+  Number of buffers: 11444 (avg 776 objects per buffer)
+  All objects have following metadata attributes: version+timestamp
+  Some objects have following metadata attributes: version+timestamp
+     1170 admin.geojsonseq
+   812651 buildings.geojsonseq
+    48968 open.geojsonseq
+   862789 total
+population raster (985, 2437) EPSG:4326 sum 16795573

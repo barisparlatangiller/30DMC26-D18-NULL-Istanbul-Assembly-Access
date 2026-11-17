@@ -1,0 +1,13 @@
+[     0 s] Istanbul: 39 districts with IBB assembly areas
+[     1 s] 39 districts, 964 mahalle (OSM admin_level 6 / 8)
+[     4 s] walk network: 1,643,072 nodes, 1,814,302 segments, 51,644 km
+[     5 s] assembly areas: 5,599; empty fields: {'OBJECTID': 0, 'TOPLANMA_ALAN_AD': 0, 'KATEGORI': 0, 'ILCEKN': 0, 'ILCE_ADI': 0, 'KIMLIKNO': 17, 'MAHALLE_ADI': 0, 'YAKA': 0, 'SE_ANNO_CAD_DATA': 5599, 'pid': 0}
+[    11 s] points inside a mapped open space: 3,673 of 5,599; kinds: {'leisure=park': 1780, 'amenity=school': 1020, 'leisure=pitch': 311, 'landuse=grass': 157, 'amenity=parking': 133, 'leisure=playground': 127, 'leisure=sports_centre': 28, 'highway=pedestrian': 24}
+[    14 s] entrances: 88,929 nodes for 5,593 points; 6 points > 150 m from any walkable way
+[    15 s] Dijkstra done: 1,375,996 nodes reached within 6 km; median 482 m
+[   118 s] buildings whose nearest way is cut off from the network: 3,396 (snapped to the next connected way)
+[   118 s] buildings: 738,615 (710,717 residential-looking); no connected way within 400 m: 821
+[   124 s] people: 15,958,744 in Istanbul (WorldPop 2020); 10,395,450 in OSM buildings, 5,563,294 (34.9%) in cells without a mapped home
+[   124 s] headline: {"people": 15958744, "share_over": {"250": 0.5552, "500": 0.2441, "1000": 0.0932, "2000": 0.0325}, "people_over_500": 3895497, "median_walk_person_m": 280}
+[   125 s] mahalle: 964, with people 906, data gap 309, no assembly area at all 57
+[   129 s] saved
