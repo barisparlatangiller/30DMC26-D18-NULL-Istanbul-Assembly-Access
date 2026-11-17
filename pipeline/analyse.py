@@ -176,22 +176,22 @@ def main():
                 return f"{k}={v}"
         return "open"
     op["kind"] = [kind(r) for r in op.to_dict("records")]
-    op["area"] = op.geometry.area
+    op["oarea"] = op.geometry.area
     # point → smallest open space containing it, else nearest within 25 m
-    j = gpd.sjoin(pts[["pid", "geometry"]], op[["kind", "area", "geometry"]], predicate="within", how="left")
-    j = j.sort_values("area").groupby("pid").first()
-    miss = j.index[j.area.isna()]
+    j = pd.DataFrame(gpd.sjoin(pts[["pid", "geometry"]], op[["kind", "oarea", "geometry"]], predicate="within", how="left").drop(columns="geometry"))
+    j = j.sort_values("oarea").groupby("pid").first()
+    miss = j.index[j.oarea.isna()]
     if len(miss):
-        jn = gpd.sjoin_nearest(pts.loc[pts.pid.isin(miss), ["pid", "geometry"]], op[["kind", "area", "geometry"]], max_distance=25, how="left")
-        jn = jn.sort_values("area").groupby("pid").first()
-        j.loc[jn.index, ["index_right", "kind", "area"]] = jn[["index_right", "kind", "area"]].values
+        jn = pd.DataFrame(gpd.sjoin_nearest(pts.loc[pts.pid.isin(miss), ["pid", "geometry"]], op[["kind", "oarea", "geometry"]], max_distance=25, how="left").drop(columns="geometry"))
+        jn = jn.sort_values("oarea").groupby("pid").first()
+        j.loc[jn.index, ["index_right", "kind", "oarea"]] = jn[["index_right", "kind", "oarea"]].values
     pts["oi"] = j.index_right.reindex(pts.pid).values
     pts["kind"] = j.kind.reindex(pts.pid).values
-    pts["area"] = j.area.reindex(pts.pid).values
+    pts["oarea"] = j.oarea.reindex(pts.pid).values.astype(float)
     # a big park shared by several points: share its area between them
     share = pts.groupby("oi").pid.transform("count")
-    pts["area_share"] = pts.area / share
-    log(f"points inside a mapped open space: {pts.area.notna().sum():,} of {len(pts):,}; kinds:", pts.kind.value_counts().head(8).to_dict())
+    pts["area_share"] = pts["oarea"] / share
+    log(f"points inside a mapped open space: {pts.oarea.notna().sum():,} of {len(pts):,}; kinds:", pts.kind.value_counts().head(8).to_dict())
 
     # entrances ----------------------------------------------------------------
     tree = cKDTree(xy)
@@ -288,7 +288,7 @@ def main():
     st["share_over"] = {str(L): round(share(alld, allp, L), 4) for L in (250, 500, 1000, 2000)}
     st["people_over_500"] = round(float(allp[alld > 500].sum()))
     wsort = np.argsort(alld); cum = np.cumsum(allp[wsort]); st["median_walk_person_m"] = round(float(alld[wsort][np.searchsorted(cum, cum[-1] / 2)]))
-    st["points"] = {"total": int(len(pts)), "in_open_space": int(pts.area.notna().sum()), "area_null": int(pts.area.isna().sum()),
+    st["points"] = {"total": int(len(pts)), "in_open_space": int(pts.oarea.notna().sum()), "area_null": int(pts.oarea.isna().sum()),
                     "off_network": int((~pts.on_network).sum()), "kinds": pts.kind.value_counts().head(10).to_dict(),
                     "fields_empty": {c: int(pts[c].isna().sum()) for c in ("SE_ANNO_CAD_DATA", "KIMLIKNO") if c in pts},
                     "area_m2_known": round(float(pts.area_share.sum()))}
@@ -304,12 +304,12 @@ def main():
     jm["out"] = jm["pop"] * (jm.d > 500); jm["orph"] = jm["pop"] * jm.orphan
     agg = jm.groupby("mid").agg(pop=("pop", "sum"), out=("out", "sum"), orph=("orph", "sum"))
     pm = gpd.sjoin(pts[["pid", "area_share", "geometry"]], mah[["mid", "geometry"]], predicate="within", how="left")
-    pa = pm.groupby("mid").agg(n=("pid", "count"), area=("area_share", "sum"), area_null=("area_share", lambda s: int(s.isna().sum())))
+    pa = pm.groupby("mid").agg(n=("pid", "count"), oarea=("area_share", "sum"), area_null=("area_share", lambda s: int(s.isna().sum())))
     mah = mah.join(agg, on="mid").join(pa, on="mid")
-    for k in ("pop", "out", "orph", "n", "area", "area_null"):
+    for k in ("pop", "out", "orph", "n", "oarea", "area_null"):
         mah[k] = mah[k].fillna(0)
     mah["share_out"] = mah.out / mah["pop"].where(mah["pop"] > 0)
-    mah["m2pp"] = mah.area / mah["pop"].where(mah["pop"] > 0)
+    mah["m2pp"] = mah["oarea"] / mah["pop"].where(mah["pop"] > 0)
     # data gap: most of the people live in cells where OSM has no home
     mah["gap"] = (mah.orph / mah["pop"].where(mah["pop"] > 0) > 0.5) & (mah["pop"] > 300)
     log(f"mahalle: {len(mah)}, with people {int((mah['pop'] > 300).sum())}, data gap {int(mah.gap.sum())}, "

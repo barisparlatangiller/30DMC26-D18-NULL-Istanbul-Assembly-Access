@@ -88,10 +88,11 @@ def main():
     # ---- mahalle, districts, points
     mah = gpd.read_parquet(B / "mahalle.parquet").to_crs(4326)
     mah["geometry"] = mah.geometry.simplify(0.0002)
+    mah = mah.rename(columns={"oarea": "area"})
     cols = ["mid", "mahalle", "district", "pop", "out", "share_out", "n", "area", "area_null", "m2pp", "orph", "gap"]
     m = mah[cols + ["geometry"]].copy()
     for c in ("pop", "out", "orph", "area"):
-        m[c] = m[c].round()
+        m[c] = m[c].astype(float).round()
     m["share_out"] = m.share_out.round(3); m["m2pp"] = m.m2pp.round(2)
     (W / "mahalle.geojson").write_text(json.dumps(clean(json.loads(m.to_json(drop_id=True))), ensure_ascii=False, separators=(",", ":")))
     dist = gpd.read_parquet(B / "districts.parquet").to_crs(4326)

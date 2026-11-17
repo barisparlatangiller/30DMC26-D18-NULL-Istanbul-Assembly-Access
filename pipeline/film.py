@@ -136,6 +136,10 @@ def main():
         routes.append((np.array(path), float(r.d)))
     zpx, zpy = zoom.xy(pts.geometry.x.values, pts.geometry.y.values)
     zin = (zpx > -20) & (zpy > -20) & (zpx < W + 20) & (zpy < MAP_H + 20)
+    zhollow = pts.area_share.isna().values[zin]
+    mline = mrow.geometry.boundary if mrow.geometry.geom_type == "Polygon" else max(mrow.geometry.geoms, key=lambda g: g.area).boundary
+    if mline.geom_type == "MultiLineString":
+        mline = max(mline.geoms, key=lambda g: g.length)
     log(f"close-up: {mrow.mahalle} ({mrow.district}), {len(zb)} buildings, {len(routes)} routes")
 
     so = st["share_over"]; p500 = st["people_over_500"]
@@ -170,14 +174,15 @@ def main():
         for i, lb in enumerate(["< 250 m", "250–500", "0.5–1 km", "1–2 km", "> 2 km"]):
             x = 48 + i * 168
             d.rounded_rectangle([x, ly, x + 22, ly + 16], 4, fill=tuple(int(c) for c in COL[i])); d.text((x + 30, ly - 4), lb, font=F["foot"], fill=INK2)
-        d.text((48, ly + 30), "walk to the nearest assembly area, along OpenStreetMap streets", font=F["foot"], fill=INK2)
-        d.ellipse([W - 300, ly + 32, W - 286, ly + 46], fill=INK); d.text((W - 278, ly + 28), "assembly area", font=F["foot"], fill=INK2)
+        d.text((48, ly + 28), "walk to the nearest assembly area, on OSM streets", font=F["foot"], fill=INK2)
+        d.ellipse([W - 400, ly + 32, W - 386, ly + 46], fill=INK); d.text((W - 378, ly + 28), "assembly area", font=F["foot"], fill=INK2)
+        d.ellipse([W - 220, ly + 32, W - 206, ly + 46], outline=INK, width=2); d.text((W - 198, ly + 28), "size: NULL", font=F["foot"], fill=INK2)
         d.text((48, H - 34), "Assembly areas © İBB Açık Veri · © OpenStreetMap contributors · WorldPop 2020 · B. Parlatangiller", font=F["foot"], fill=(110, 106, 100))
         if overlay:
             overlay(d)
         return im
 
-    def dots(img, px, py, r=1.6, col=INK, hollow=None):
+    def dots(img, px, py, r=1.0, col=(226, 222, 214), hollow=None):
         im = Image.fromarray(np.clip(img, 0, 255).astype("uint8")); d = ImageDraw.Draw(im)
         for i, (x, y) in enumerate(zip(px, py)):
             if hollow is not None and hollow[i]:
@@ -201,16 +206,16 @@ def main():
     order = np.argsort(np.random.default_rng(1).random(len(ppx)))
     for k in range(int(FPS * 1.8)):
         m = order[: int(len(order) * ease(k / (FPS * 1.4)))]
-        save(compose(dots(base0, ppx[m], ppy[m], 1.5), f"Istanbul has {pts_total:,} earthquake", "assembly areas. How far is the walk?"))
-    withdots = dots(base0, ppx, ppy, 1.5)
+        save(compose(dots(base0, ppx[m], ppy[m], 1.1), f"Istanbul has {pts_total:,} earthquake", "assembly areas. How far is the walk?"))
+
     # 3 · the walk grows
     NG = int(FPS * 5.0)
     for k in range(NG):
         t = 2200 * ease(k / (NG - 1)) ** 1.1
-        img = dots(colour_streets(Dst, t), ppx, ppy, 1.5)
+        img = dots(colour_streets(Dst, t), ppx, ppy, 0.9)
         lab = f"{t:,.0f} m" if t < 1000 else f"{t / 1000:.1f} km"
         save(compose(img, "Walking along real streets", f"from every assembly area outward: {lab}"))
-    full = dots(colour_streets(Dst, 1e9), ppx, ppy, 1.5)
+    full = dots(colour_streets(Dst, 1e9), ppx, ppy, 0.9)
     # 4 · NULL beyond 500 m
     NN = int(FPS * 3.6)
     for k in range(NN):
@@ -219,7 +224,7 @@ def main():
         img = full * (1 - a) + img * a
         glow = nullmask[..., None] * NULLC
         img = np.where(nullmask[..., None], img * (1 - a) + glow * a, img)
-        img = dots(img, ppx, ppy, 1.5)
+        img = dots(img, ppx, ppy, 0.8, col=(200, 196, 188))
         save(compose(img, "Beyond 500 m: NULL", "homes more than a 7-minute walk away",
                      big=(f"{so['500'] * 100:.0f}% of residents", f"about {p500 / 1e6:.1f} million people live more than", "a 500 m walk from the nearest assembly area") if k > FPS * 0.8 else None))
     nullimg = img
@@ -233,8 +238,14 @@ def main():
     for k in range(NR):
         a = ease(k / (FPS * 3.0))
         im = Image.fromarray(np.clip(zimg, 0, 255).astype("uint8")); d = ImageDraw.Draw(im)
-        for x, y in zip(zpx[zin], zpy[zin]):
-            d.ellipse([x - 7, y - 7, x + 7, y + 7], outline=INK, width=2)
+        for x, y, hol in zip(zpx[zin], zpy[zin], zhollow):
+            if hol:
+                d.ellipse([x - 7, y - 7, x + 7, y + 7], outline=INK, width=2)
+            else:
+                d.ellipse([x - 6, y - 6, x + 6, y + 6], fill=INK, outline=BG, width=1)
+        mxs, mys = zoom.xy(*np.asarray(mline.coords).T)
+        d.line(list(zip(mxs, mys)), fill=(240, 236, 228), width=2)
+        boxes = []
         for path, dd in routes:
             pxs, pys = zoom.xy(path[:, 0], path[:, 1])
             m = max(2, int(len(pxs) * a))
@@ -243,7 +254,16 @@ def main():
             d.line(list(zip(pxs[:m], pys[:m])), fill=c, width=4, joint="curve")
             d.ellipse([pxs[0] - 6, pys[0] - 6, pxs[0] + 6, pys[0] + 6], fill=c, outline=(255, 255, 255), width=2)
             if a >= 1:
-                d.text((pxs[0] + 10, pys[0] - 30), f"{dd:,.0f} m · {max(1, round(dd / 75))} min", font=F["lab"], fill=INK, stroke_width=3, stroke_fill=BG)
+                t = f"{dd:,.0f} m · {max(1, round(dd / 75))} min"; tw = d.textlength(t, font=F["lab"])
+                x, y = pxs[0] + 10, pys[0] - 30
+                if x + tw > W - 10:
+                    x = pxs[0] - 10 - tw
+                for _ in range(8):
+                    if not any(x < bx1 and x + tw > bx0 and y < by1 and y + 28 > by0 for bx0, by0, bx1, by1 in boxes):
+                        break
+                    y += 30
+                boxes.append((x, y, x + tw, y + 28))
+                d.text((x, y), t, font=F["lab"], fill=INK, stroke_width=3, stroke_fill=BG)
         far_d = max((r[1] for r in routes), default=0)
         save(compose(np.asarray(im).astype(float), f"{mrow.mahalle}, {mrow.district}",
                      f"the farthest homes walk {far_d / 1000:.1f} km, about {round(far_d / 75)} minutes"))
