@@ -80,7 +80,7 @@ def main():
                 d = int(round(r.d)) if np.isfinite(r.d) else -1
                 pr = {"d": d, "n": int(r.n), "a": int(r.pid), "p": round(float(r.pop), 1)}
                 fh.write(json.dumps({"type": "Feature", "properties": pr, "geometry": json.loads(shapely.to_geojson(geom))}, separators=(",", ":")) + "\n")
-        subprocess.run(["tippecanoe", "-o", str(W / "buildings.pmtiles"), "--force", "-l", "b", "-Z", "12", "-z", "16",
+        subprocess.run(["tippecanoe", "-o", str(W / "buildings.pmtiles"), "--force", "-l", "b", "-Z", "12", "-z", "15",
                         "--drop-densest-as-needed", "--extend-zooms-if-still-dropping", "--no-tile-size-limit",
                         "--simplification=2", "-q", str(seq)], check=True)
     print("buildings.pmtiles", round((W / "buildings.pmtiles").stat().st_size / 1e6, 1), "MB")

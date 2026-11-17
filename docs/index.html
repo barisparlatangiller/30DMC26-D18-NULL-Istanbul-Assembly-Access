@@ -1,1 +1,113 @@
-<!doctype html><meta charset="utf-8"><title>Istanbul assembly areas</title><p>Building… #30DayMapChallenge Day 18</p>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NULL · Istanbul Assembly Areas</title>
+<meta name="description" content="Istanbul's 5,599 earthquake assembly areas are on the map. How far is the walk from your building, along real streets? And what does the data leave out?">
+<meta property="og:title" content="NULL · On the map, out of reach: Istanbul's earthquake assembly areas">
+<meta property="og:description" content="Walking distance from every building in Istanbul to its nearest earthquake assembly area, along OpenStreetMap streets. Tap a building to see the route.">
+<script>
+  (function () { var t = new URLSearchParams(location.search).get("theme"); document.documentElement.dataset.theme = t === "light" ? "light" : "dark"; })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+<link href="style.css?v=18" rel="stylesheet">
+</head>
+<body>
+<div class="app">
+  <main class="mapwrap">
+    <div id="map" aria-label="Map of Istanbul: walking distance from every building to the nearest earthquake assembly area"></div>
+    <div class="card legend-card" id="legend" aria-live="polite"></div>
+    <div class="card mapbar">
+      <div class="seg seg2 mini" id="layerSeg"><button data-l="b" class="on">Buildings</button><button data-l="m">Neighbourhoods</button></div>
+      <button class="pill" id="themeBtn">☀ Light map</button>
+    </div>
+    <div id="tip" class="tip" hidden></div>
+    <div id="loading" class="loading">Loading Istanbul…</div>
+    <div class="intro card" id="intro" hidden>
+      <p class="eyebrow">#30DayMapChallenge · Day 18 · NULL</p>
+      <h2>On the map. Out of reach?</h2>
+      <ol class="steps">
+        <li>Istanbul lists <b>5,599 earthquake assembly areas</b>. This map measures the walk from every building to the nearest one, along real streets and paths, not as the crow flies.</li>
+        <li><b>Tap any building</b> to see the shortest walking route and how long it takes.</li>
+        <li><b>NULL</b> has two meanings here: homes more than 500 m from any assembly area, and the data that is simply missing, like the size of each area.</li>
+      </ol>
+      <button class="primary" id="introGo">Find my building</button>
+    </div>
+  </main>
+
+  <aside class="panel card" id="panel">
+    <header class="head">
+      <p class="eyebrow">#30DayMapChallenge · Day 18 · NULL · Istanbul</p>
+      <h1>NULL · On the map, out of reach</h1>
+      <p class="lede" id="lede">&nbsp;</p>
+    </header>
+
+    <section class="block" id="detail" hidden></section>
+
+    <section class="block">
+      <h2 class="label">Find a place</h2>
+      <div class="search"><input id="q" type="search" placeholder="Neighbourhood or assembly area, e.g. Esenyurt" autocomplete="off"><button id="qGo">Search</button></div>
+      <p class="msg" id="qMsg"></p>
+    </section>
+
+    <section class="block">
+      <h2 class="label">How far is the walk? · share of residents</h2>
+      <div class="stack big-stack" id="walkStack"></div>
+      <div class="spk" id="walkKey"></div>
+    </section>
+
+    <section class="block">
+      <h2 class="label">Districts · residents beyond 500 m</h2>
+      <ul class="rank" id="distRank"></ul>
+      <p class="hint">Click a district to zoom in.</p>
+    </section>
+
+    <section class="block">
+      <h2 class="label">Neighbourhoods with the most people beyond 500 m</h2>
+      <ul class="rank" id="mahRank"></ul>
+    </section>
+
+    <section class="block">
+      <h2 class="label">The other NULL: what the data leaves out</h2>
+      <div class="nulls" id="nulls"></div>
+    </section>
+
+    <section class="block">
+      <h2 class="label">Method, data &amp; limits</h2>
+      <details class="howto" open>
+        <summary>How the walk is measured</summary>
+        <p><b>Streets, not circles.</b> The distance is the shortest walk along OpenStreetMap: streets with or without sidewalks, paths, steps and squares. Motorways and ways closed to pedestrians are left out. A 500 m circle would promise more than the streets deliver.</p>
+        <p><b>Entrances.</b> Where an assembly point lies in a mapped park, square or school yard, you arrive as soon as you reach its edge. Otherwise you walk to the point itself.</p>
+        <p><b>Buildings.</b> Every OSM building takes the walk from its nearest street node. Residents come from WorldPop 2020 (100 m grid), shared out to the residential buildings in each cell by footprint area.</p>
+        <p><b>500 m</b> is the threshold of the original plan (Day 18 brief); it is roughly a 7-minute walk. You can read 250 m, 1 km and 2 km in the bar above.</p>
+      </details>
+      <details class="howto">
+        <summary>Data quality &amp; limits</summary>
+        <p id="dq"></p>
+        <p>The IBB dataset gives a point and a name, no area and no capacity. Areas here come from the OSM open space a point lies in and are an estimate. Population is a 2020 model, not a register. Roads blocked by debris, fences or crowds after an earthquake are not in any map. The map shows <b>walking distance on a normal day</b>, not safety or capacity.</p>
+      </details>
+      <details class="howto">
+        <summary>Sources</summary>
+        <ol class="refs">
+          <li>Acil Durum Toplanma Alanları, İstanbul Büyükşehir Belediyesi, <a href="https://data.ibb.gov.tr/">İBB Açık Veri Portalı</a>.</li>
+          <li>OpenStreetMap contributors, ODbL: walk network, buildings, open spaces, mahalle and district boundaries (Geofabrik extract).</li>
+          <li>WorldPop (2020). Constrained individual countries population, Türkiye, 100 m. <a href="https://www.worldpop.org/">worldpop.org</a>, CC BY 4.0.</li>
+        </ol>
+      </details>
+    </section>
+
+    <footer class="foot">
+      <p><b>Data &amp; licences.</b> Assembly areas © İBB Açık Veri · © OpenStreetMap contributors (ODbL) · WorldPop (CC BY 4.0) · basemap © <a href="https://carto.com/attribution">CARTO</a>.</p>
+      <p>Barış Parlatangiller · <a href="https://barisparlatangiller.github.io/">all 30 maps</a> · <a href="https://github.com/barisparlatangiller/30DMC26-D18-NULL-Istanbul-Assembly-Access">source &amp; method</a> · built with AI assistance (Claude, Anthropic)</p>
+    </footer>
+  </aside>
+</div>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/pmtiles@3.2.1/dist/pmtiles.js"></script>
+<script src="app.js?v=18"></script>
+</body>
+</html>

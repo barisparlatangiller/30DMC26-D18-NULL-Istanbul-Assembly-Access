@@ -42,6 +42,19 @@ NON_RES = {"industrial", "warehouse", "commercial", "retail", "office", "mosque"
            "kiosk", "toilets", "transformer_tower", "water_tower", "silo", "storage_tank", "bunker", "tent", "carport",
            "factory", "manufacture", "hangar", "fuel", "power", "substation", "military", "castle", "tower", "bridge"}
 OPEN_KEYS = ("leisure", "landuse", "amenity", "place", "area:highway", "highway")
+OPEN_OK = {"leisure": {"park", "garden", "playground", "pitch", "recreation_ground", "sports_centre", "stadium", "common", "dog_park",
+                       "fitness_station", "schoolyard", "track", "picnic_site"},
+           "landuse": {"grass", "recreation_ground", "village_green", "meadow"},
+           "amenity": {"school", "college", "university", "kindergarten", "parking"},
+           "place": {"square"}, "area:highway": None, "highway": {"pedestrian"}}
+
+
+def is_open(p):
+    for k, ok in OPEN_OK.items():
+        v = p.get(k)
+        if isinstance(v, str) and (ok is None or v in ok):
+            return True
+    return False
 T0 = time.time()
 
 
@@ -129,14 +142,15 @@ def main():
     adm = read_seq(IN / "admin.geojsonseq", lambda p: p.get("boundary") == "administrative" and p.get("admin_level") in ("4", "6", "8"))
     adm = adm.to_crs(CRS)
     adm["geometry"] = shapely.make_valid(adm.geometry.values)
-    prov = adm[(adm.admin_level == "4") & adm["name"].str.contains("İstanbul|Istanbul", na=False)]
-    city = shapely.union_all(prov.geometry.values) if len(prov) else None
-    log(f"province polygon: {'found' if city is not None else 'NOT FOUND'}")
     dist = adm[adm.admin_level == "6"].copy()
     mah = adm[adm.admin_level == "8"].copy()
-    if city is not None:
-        rp = lambda g: g.geometry.representative_point()
-        dist = dist[rp(dist).within(city)]; mah = mah[rp(mah).within(city)]
+    # Istanbul = the districts that hold IBB assembly areas (the bbox also cuts into Kocaeli and Tekirdağ)
+    ibb = gpd.read_file("data/ibb_toplanma_alanlari.geojson").to_crs(CRS)
+    cnt = gpd.sjoin(ibb[["geometry"]], dist[["geometry"]], predicate="within").groupby("index_right").size()
+    dist = dist.loc[cnt.index[cnt >= 5]]
+    city = shapely.union_all(dist.geometry.values).buffer(30)
+    mah = mah[mah.geometry.representative_point().within(city)]
+    log(f"Istanbul: {len(dist)} districts with IBB assembly areas")
     dist = dist[["name", "geometry"]].rename(columns={"name": "district"}).reset_index(drop=True)
     mah = mah[["name", "geometry"]].rename(columns={"name": "mahalle"}).reset_index(drop=True)
     mah["district"] = gpd.sjoin(gpd.GeoDataFrame(geometry=mah.geometry.representative_point(), crs=CRS), dist, predicate="within", how="left") \
@@ -152,13 +166,14 @@ def main():
     pts = gpd.read_file("data/ibb_toplanma_alanlari.geojson").to_crs(CRS)
     pts["pid"] = np.arange(len(pts))
     log(f"assembly areas: {len(pts):,}; empty fields:", {c: int(pts[c].isna().sum()) for c in pts.columns if c != "geometry"})
-    op = read_seq(IN / "open.geojsonseq", lambda p: any(k in p for k in OPEN_KEYS)).to_crs(CRS)
+    op = read_seq(IN / "open.geojsonseq", is_open).to_crs(CRS)
     op["geometry"] = shapely.make_valid(op.geometry.values)
     op = op[op.geometry.area.between(80, 2_000_000)].reset_index(drop=True)
     def kind(r):
-        for k in OPEN_KEYS:
-            if isinstance(r.get(k), str):
-                return f"{k}={r[k]}"
+        for k, ok in OPEN_OK.items():
+            v = r.get(k)
+            if isinstance(v, str) and (ok is None or v in ok):
+                return f"{k}={v}"
         return "open"
     op["kind"] = [kind(r) for r in op.to_dict("records")]
     op["area"] = op.geometry.area
